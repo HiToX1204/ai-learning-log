@@ -12,13 +12,13 @@
 # print(img[:,:,2])
 import cv2
 import numpy as np
-img = np.full((60, 100, 3), 255, dtype=np.uint8)   # 60行 100列 白图
-cv2.rectangle(img, (10, 10), (40, 30), (255, 0, 0), -1)   # 蓝色实心矩形
-print(img[20, 20])      # 看第20行第20列那个像素的三个数
-img = np.zeros((50, 80,3), dtype=np.uint8)
-print(img.shape)          # 期望 (50, 80, 3)
-import cv2                 # 放文件最上面也可以
+img = np.zeros((50, 80, 3), dtype=np.uint8)
+print(img.shape)          # 期望 (50, 80, 3)               # 放文件最上面也可以
 cv2.rectangle(img, (10, 10), (39, 49), (0, 0, 255), -1)
+print(img[10, 10])    # 应该是 [0, 0, 255]
 red = img[:, :, 2]         # 抽出红层
 print(red.sum())           # 顺手看看红色总量
 print((red > 0).sum())     # 数有多少个像素的红色 > 0
+col_counts=img[:, :, 2].sum(axis=0)  # 每一列的红色总量
+print(col_counts)  
+print(np.argmax(col_counts))  # 红色最多的列
