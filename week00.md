@@ -1,14 +1,13 @@
-\# Week 0 · 预备
+# Week 0 · 预备
 
-\- 现在的环境：Windows，git 有，conda 没有，python 是坏的（WindowsApps 占位符）
+## 小日志（每天结束时加一条）
 
-\- 今天要做完：装 conda、建环境、跑通 import numpy
+- 11-06 五：环境排错，`python` 是 WindowsApps 空壳占位符，真身 Python 3.14.7；conda 静默安装失败，改用系统 Python。
+- 11-07 六：修 PATH（真身插最前）→ uv 建 venv → numpy/cv2 跑通；学 shape/axis，第一次 commit。
+- 11-08 日：热身题全对；任务 1–2（造图/画框/通道掩码）；踩"白底导致红像素=全图"的坑后修正。
+- 11-09 一：GitHub 建库并 push 成功；补 git 命令与 diff 格式；任务 3（argmax）；掩码索引；阈值扫描；Otsu 失效分析。
 
-\- 我的 Python 水平：能做一点题，祝明天ics考试顺利
-
-\- 我的 C++ 水平：能读懂 OpenCV 项目，写起来慢
-
-\- 两周后的验收：一个别人能 clone 跑起来的仓库
+---
 
 
 ## Week 0 · NumPy 与阈值
