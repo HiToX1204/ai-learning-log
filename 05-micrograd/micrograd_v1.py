@@ -116,11 +116,3 @@ class Value:
 # y.backward()
 # print(y)          # ?
 # print(x.grad)     # ?
-h = 1e-6
-x = 1.0
-print("数值导数:", (math.tanh(x+h) - math.tanh(x-h)) / (2*h))
-
-xv = Value(1.0)
-yv = xv.tanh()
-yv.backward()
-print("autograd:", xv.grad)
