@@ -17,22 +17,33 @@
 | `03-pandas/` | 表格数据：筛选、groupby、CSV 读写、缺失值 |
 | `04-calculus/` | 导数、数值求导、梯度下降、学习率 |
 | `05-micrograd/` | 手写自动微分与反向传播（进行中） |
+| `06-pytorch/` | PyTorch 对照、训练闭环、loss 曲线 |
+| `topics/` | **专题笔记**：一个主题一篇，可独立阅读 |
 | `notes/` | 每日详细笔记（公式、数据、踩过的坑） |
 | `logs/` | 月度日志与阶段进度 |
 | `plan/` | 学习计划与 X Program 课题门槛分析 |
 
+## 专题笔记（`topics/`）
+
+| 文件 | 内容 |
+|---|---|
+| [`topics/神经网络的理解.md`](topics/神经网络的理解.md) | 两层解释（小白 + 专业）：数据/损失/梯度/反向传播/训练闭环；术语对应表、易错点、自检题 |
+| [`topics/非线性的必要性.md`](topics/非线性的必要性.md) | 以本人提出的三个观点为主线：分段线性逼近、封闭性、泰勒类比、ReLU 与深度、激活函数选择 |
+
 ## 环境与运行
 
 ```bash
-# 环境：Python 3.14 + venv（uv 管理）
+# 环境：Python 3.14 + 单一 venv（uv 管理）
 uv venv .venv --python 3.14
-uv pip install numpy opencv-python pandas
+uv pip install numpy opencv-python pandas torch
 
 # 运行任一练习
 uv run python 01-array-basics/lesson02.py
 ```
 
-不需要激活虚拟环境，`uv run` 会自动找到 `.venv`。
+- 只有一个环境：`.venv`（3.14），所有脚本共用
+- 不需要激活虚拟环境，`uv run` 会自动找到 `.venv`；VS Code 里直接点 ▶ 也可以
+- PowerShell 侧禁用了 venv 自动激活（系统禁止运行未签名的 `.ps1`），不影响运行
 
 ## 进度
 
