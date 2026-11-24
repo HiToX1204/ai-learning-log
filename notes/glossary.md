@@ -1,0 +1,173 @@
+# 词汇与 API 参数卡
+
+> 用途：堵住"盲人摸象"。每个新词/新 API 第一次出现时，先在这里留一张卡，**讲之前先把卡亮出来**，然后再出题。
+> 出题只考"已给规则 + 换新数字"，不考"没讲过的规则"。
+
+---
+
+## 一、PyTorch 基础对象
+
+### Tensor（张量）
+- **是什么**：PyTorch 里的多维数字表，和 numpy 的 `ndarray` 同类。
+- **长什么样**：`tensor([[0., 1.], [1., 0.]])`
+- **看形状**：`t.shape` → `torch.Size([2, 2])`，读作 2 行 2 列。
+
+### Parameter（参数张量）
+- **是什么**：一种特殊 Tensor，多带一个标记"训练时要给它算梯度"。
+- **长什么样**：屏幕上显示 `Parameter containing: tensor([...], requires_grad=True)`
+- **怎么来的**：`nn.Linear` 等层在创建时自动生成，不用你手动造。
+
+### requires_grad
+- **是什么**：Tensor 上的一个布尔标记，`True` = 参与求导。
+- **作用**：`loss.backward()` 会沿着所有 `requires_grad=True` 的张量算梯度。
+
+### shape（形状）
+- **是什么**：每一维的长度。`(4, 2)` = 4 行 2 列。
+- `(4,)` 是一个长度 4 的一维表（不是 4 行 1 列，虽然能互相转）。
+
+---
+
+## 二、`nn.Linear`（全连接层）
+
+```python
+nn.Linear(in_features, out_features, bias=True)
+```
+
+| 位置 | 名字 | 含义 |
+|---|---|---|
+| 第 1 个 | `in_features` | 喂进来**一行**有几个数（输入维度） |
+| 第 2 个 | `out_features` | 这一层有**几个神经元**，也就是输出几个数 |
+| 第 3 个 | `bias` | 是否带偏置，默认 `True` |
+
+| 属性 | 形状 | 含义 |
+|---|---|---|
+| `layer.weight` | `(out_features, in_features)` | **神经元数在前**，输入数在后 |
+| `layer.bias` | `(out_features,)` | 每个神经元一个偏移 |
+
+- **它算什么**：$y = x\,W^\top + b$，其中 $W$ = `layer.weight`
+- **参数个数**：`out*in + out`
+- **例 1**：`nn.Linear(2, 4)` → weight `(4,2)`、bias `(4,)`、参数 $8+4=12$
+- **例 2**：`nn.Linear(5, 2)` → weight `(2,5)`、bias `(2,)`、参数 $10+2=12$
+- **例 3**：`nn.Linear(4, 1)` → weight `(1,4)`、bias `(1,)`、参数 $4+1=5$
+
+> ⚠️ 容易错：`nn.Linear(in, out)` 存成 `(out, in)`；而手写代码里常写成 `W` 是 `(in, out)` 然后用 `x @ W`。两者差一个转置，形状数字会骗人。
+
+---
+
+## 三、`nn.Tanh`（双曲正切激活函数）
+
+```python
+nn.Tanh()
+```
+
+- **参数**：没有。它没有可训练的数字。
+- **形状**：输入什么形状，输出什么形状（逐元素套公式）
+- **公式**：$\tanh(z)=\dfrac{e^z-e^{-z}}{e^z+e^{-z}}$，把任意实数压到 $(-1,1)$
+- **作用**：制造非线性，矩阵乘法本身做不到的事
+
+## 四、`nn.Sequential`（顺序容器）
+
+```python
+nn.Sequential(层1, 层2, ...)
+```
+
+- **参数**：任意多个层/函数，按**给定顺序**串起来
+- **调用**：`model(x)` 等于 `层2(层1(x))`
+- **额外能力**：`model.parameters()` 一次性取出所有层的可训练参数；`model.named_parameters()` 连名字一起给
+
+## 五、`nn.MSELoss`（均方误差）
+
+**MSE = Mean Squared Error = 均方误差**，三个词逐个对应：
+
+| 字母 | 英文 | 中文 | 意思 |
+|---|---|---|---|
+| M | Mean | 平均 | 最后除以点的个数 |
+| S | Squared | 平方 | 每个误差先平方 |
+| E | Error | 误差 | 预测减正确答案 |
+
+公式（$N$ = 元素总个数）：
+
+$$\text{MSE}=\frac{1}{N}\sum_{i}(\text{pred}_i-Y_i)^2$$
+
+手算一组（你 11-21 算过的那个）：
+
+| 点 | pred | Y | 误差 pred−Y | 平方 |
+|---|---|---|---|---|
+| 1 | 0.5 | 0 | 0.5 | 0.25 |
+| 2 | 0.5 | 1 | −0.5 | 0.25 |
+| 3 | 0.5 | 1 | −0.5 | 0.25 |
+| 4 | 0.5 | 0 | 0.5 | 0.25 |
+
+$$\text{MSE}=\frac{0.25+0.25+0.25+0.25}{4}=0.25$$
+
+**这就是屏幕上那个 `loss = 0.25` 的来源。**
+
+- 为什么要平方：① 正负误差不互相抵消；② 大错罚得重（误差 2 罚 4，误差 10 罚 100）
+- 代码里的两种写法：
+  ```python
+  loss = ((pred - Y) ** 2).mean()   # 手写版（xor_mlp.py 第 20 行，你写过）
+  loss = nn.MSELoss()(pred, Y)      # 封装版（xor_nn.py 第 21 行）
+  ```
+- **参数**：`nn.MSELoss()` 默认没有参数（等于求平均）
+- **返回**：一个标量
+- ⚠️ 它是**回归**用的尺子；分类任务里它和"准确率"不一致（2026-11-24 实测：准确率更高的线 MSE 反而大 74 倍）
+
+
+## 六、`torch.optim.SGD`（随机梯度下降优化器）
+
+```python
+torch.optim.SGD(params, lr=0.1)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `params` | 要优化的张量列表，通常写 `model.parameters()` |
+| `lr` | 学习率 = **步幅**（你 11-24 重新锚定的那个词） |
+
+- **它保存什么**：不保存参数副本，只**记住这些张量**，改的时候直接改原张量
+- **`opt.step()`**：对每个参数执行 `p -= lr * p.grad`
+- **`opt.zero_grad()`**：把每个参数的 `.grad` 清零（因为梯度是累加的）
+
+---
+
+## 七、训练循环里那 5 行（顺序不能换）
+
+```python
+opt.zero_grad()          # 1. 清空上一步留下的梯度
+pred = model(X)          # 2. 前向：算预测
+loss = loss_fn(pred, Y)  # 3. 算差距（一个标量）
+loss.backward()          # 4. 反向：给每个参数填 .grad
+opt.step()               # 5. 按 .grad 改参数
+```
+
+---
+
+## 八、常用小工具
+
+| 写法 | 含义 |
+|---|---|
+| `t.shape` | 形状 |
+| `t.item()` | 取出标量张量里的 Python 数 |
+| `t.tolist()` | 转成 Python 列表 |
+| `t.flatten()` | 拉成一维 |
+| `p.numel()` | 元素总数 |
+| `torch.manual_seed(0)` | 固定随机种子，让随机初始化可复现 |
+
+---
+
+## 九、缩写必须展开（血的教训）
+
+**任何三个大写字母的缩写，第一次出现时先展开英文全称 + 中文，再往下讲。** 已出现过、必须会展开的：
+
+| 缩写 | 全称 | 中文 | 一句话 |
+|---|---|---|---|
+| MSE | Mean Squared Error | 均方误差 | $(\text{pred}-Y)^2$ 的平均 |
+| SGD | Stochastic Gradient Descent | 随机梯度下降 | 每次用一小批数据算梯度往下走 |
+| ReLU | Rectified Linear Unit | 修正线性单元 | $\max(0,z)$，负数变 0 |
+| lr | learning rate | 学习率 | 步幅 |
+| MLP | Multi-Layer Perceptron | 多层感知机 | 一串 Linear + 激活 |
+| BCE | Binary Cross Entropy | 二元交叉熵 | 二分类常用的损失 |
+| det | determinant | 行列式 | 面积/体积缩放倍数；本期只当"两行成比例"判据用 |
+| ML | Machine Learning | 机器学习 | — |
+| NN | Neural Network | 神经网络 | — |
+
