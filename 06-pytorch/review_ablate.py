@@ -11,7 +11,7 @@ loss_fn=nn.MSELoss()
 loss_fn(model(x),y)
 opt=torch.optim.SGD(model.parameters(),lr=0.1)
 for i in range(5000):
-    # opt.zero_grad()
+    opt.zero_grad()
     pred=model(x)
     loss=loss_fn(pred,y)
     loss.backward()
